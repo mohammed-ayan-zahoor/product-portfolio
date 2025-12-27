@@ -1,12 +1,20 @@
 "use client";
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ShoppingCart, User, LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
+    const pathname = usePathname();
+
+    const navLinks = [
+        { href: '/category/hardware', label: 'Hardware' },
+        { href: '/category/software', label: 'Software' },
+        { href: '/category/education', label: 'Education' },
+    ];
 
     return (
         <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
@@ -16,9 +24,18 @@ export default function Navbar() {
                         <span className="text-2xl font-bold tracking-tight text-primary">TechFlow</span>
                     </Link>
                     <div className="hidden md:flex md:items-center md:gap-6">
-                        <Link href="/category/hardware" className="text-sm font-medium text-foreground/70 transition-colors hover:text-primary">Hardware</Link>
-                        <Link href="/category/software" className="text-sm font-medium text-foreground/70 transition-colors hover:text-primary">Software</Link>
-                        <Link href="/category/education" className="text-sm font-medium text-foreground/70 transition-colors hover:text-primary">Education</Link>
+                        {navLinks.map((link) => (
+                            <Link
+                                key={link.href}
+                                href={link.href}
+                                className={cn(
+                                    "text-sm font-medium transition-colors hover:text-primary",
+                                    pathname === link.href ? "text-primary" : "text-foreground/70"
+                                )}
+                            >
+                                {link.label}
+                            </Link>
+                        ))}
                     </div>
                 </div>
 
@@ -43,11 +60,21 @@ export default function Navbar() {
             {isOpen && (
                 <div className="border-b border-border bg-background md:hidden">
                     <div className="space-y-1 px-4 py-4">
-                        <Link href="/category/hardware" className="block py-2 text-base font-medium text-foreground/70 hover:text-primary">Hardware</Link>
-                        <Link href="/category/software" className="block py-2 text-base font-medium text-foreground/70 hover:text-primary">Software</Link>
-                        <Link href="/category/education" className="block py-2 text-base font-medium text-foreground/70 hover:text-primary">Education</Link>
+                        {navLinks.map((link) => (
+                            <Link
+                                key={link.href}
+                                href={link.href}
+                                onClick={() => setIsOpen(false)}
+                                className={cn(
+                                    "block py-2 text-base font-medium transition-colors hover:text-primary",
+                                    pathname === link.href ? "text-primary" : "text-foreground/70"
+                                )}
+                            >
+                                {link.label}
+                            </Link>
+                        ))}
                         <hr className="my-2 border-border" />
-                        <Link href="/login" className="block py-2 text-base font-medium text-foreground/70 hover:text-primary">Login</Link>
+                        <Link href="/login" onClick={() => setIsOpen(false)} className="block py-2 text-base font-medium text-foreground/70 hover:text-primary">Login</Link>
                     </div>
                 </div>
             )}

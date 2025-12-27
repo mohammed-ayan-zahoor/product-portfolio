@@ -1,86 +1,83 @@
 import ProductCard from "@/components/ProductCard";
 import { notFound } from "next/navigation";
+import dbConnect from "@/lib/db";
+import Product from "@/models/Product";
+import Category from "@/models/Category";
 
-// Mock data for initial UI
-const allProducts = [
-    {
-        _id: '1',
-        title: 'Enterprise Server Pro',
-        slug: 'enterprise-server-pro',
-        price: 150000,
-        images: ['https://images.unsplash.com/photo-1558494949-ef010cbdcc51?q=80&w=800&auto=format&fit=crop'],
-        categorySlug: 'hardware',
-        categoryName: 'Hardware'
-    },
-    {
-        _id: '2',
-        title: 'Cloud Security Suite',
-        slug: 'cloud-security-suite',
-        price: 45000,
-        images: ['https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop'],
-        categorySlug: 'software',
-        categoryName: 'Software'
-    },
-    {
-        _id: '3',
-        title: 'AI & Data Science Boot Camp',
-        slug: 'ai-data-science-boot-camp',
-        price: 25000,
-        images: ['https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800&auto=format&fit=crop'],
-        categorySlug: 'education',
-        categoryName: 'Education'
-    },
-    {
-        _id: '4',
-        title: 'Precision Workstation Z4',
-        slug: 'precision-workstation-z4',
-        price: 85000,
-        images: ['https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?q=80&w=800&auto=format&fit=crop'],
-        categorySlug: 'hardware',
-        categoryName: 'Hardware'
+export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ params }) {
+    const { slug } = await params;
+    await dbConnect();
+
+    if (slug === 'all') {
+        return { title: 'All Products | TechFlow', description: 'Explore our complete range of premium tech solutions.' };
     }
-];
 
-const categories = {
-    hardware: "Hardware Solutions",
-    software: "Enterprise Software",
-    education: "Professional Education",
-    all: "All Offerings"
-};
+    const category = await Category.findOne({ slug, isActive: true }).lean();
+    if (!category) return { title: 'Category Not Found' };
+
+    return {
+        title: `${category.name} | TechFlow`,
+        description: `Explore our premium ${category.name} offerings including enterprise hardware and software solutions.`
+    };
+}
+
+async function getCategoryData(slug) {
+    await dbConnect();
+
+    let category = null;
+    let products = [];
+
+    if (slug === 'all') {
+        category = { name: 'All Offerings', slug: 'all' };
+        products = await Product.find({ isActive: true }).sort({ createdAt: -1 }).lean();
+    } else {
+        category = await Category.findOne({ slug, isActive: true }).lean();
+        if (!category) return null;
+
+        products = await Product.find({ categoryId: category._id, isActive: true })
+            .sort({ createdAt: -1 })
+            .lean();
+    }
+
+    return {
+        category: JSON.parse(JSON.stringify(category)),
+        products: JSON.parse(JSON.stringify(products))
+    };
+}
 
 export default async function CategoryPage({ params }) {
     const { slug } = await params;
+    const data = await getCategoryData(slug);
 
-    if (!categories[slug]) {
-        notFound();
-    }
+    if (!data) notFound();
 
-    const filteredProducts = slug === 'all'
-        ? allProducts
-        : allProducts.filter(p => p.categorySlug === slug);
+    const { category, products } = data;
 
     return (
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-            <div className="mb-10 text-center">
-                <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                    {categories[slug]}
-                </h1>
-                <p className="mt-4 text-base text-foreground/60 max-w-2xl mx-auto">
-                    Explore our range of {slug === 'all' ? 'Hardware, Software and Education' : slug} offerings designed for excellence.
-                </p>
-            </div>
+        <div className="min-h-screen bg-slate-50/50 pb-20 pt-24">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="mb-12">
+                    <h1 className="text-4xl font-bold tracking-tight text-foreground">{category.name}</h1>
+                    <p className="mt-4 text-lg text-foreground/50 max-w-2xl">
+                        Browse our curated selection of professional {category.name.toLowerCase()} designed for modern enterprises and high-performance environments.
+                    </p>
+                </div>
 
-            {filteredProducts.length > 0 ? (
                 <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-                    {filteredProducts.map((product) => (
+                    {products.map((product) => (
                         <ProductCard key={product._id} product={product} />
                     ))}
                 </div>
-            ) : (
-                <div className="py-20 text-center">
-                    <p className="text-lg text-foreground/40">No products found in this category.</p>
-                </div>
-            )}
+
+                {products.length === 0 && (
+                    <div className="rounded-2xl border-2 border-dashed border-border py-20 text-center">
+                        <p className="text-lg font-medium text-foreground/40">No products found in this category.</p>
+                        <p className="mt-1 text-sm text-foreground/30">Check back later for new arrivals.</p>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

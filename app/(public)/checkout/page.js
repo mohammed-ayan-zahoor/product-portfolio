@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShieldCheck, CreditCard, Loader2 } from 'lucide-react';
+import Script from 'next/script';
 
 export default function CheckoutPage() {
     const [cart, setCart] = useState([]);
@@ -33,15 +34,96 @@ export default function CheckoutPage() {
 
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
+    const loadRazorpay = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
 
-        // This will be replaced with real Razorpay integration later
-        setTimeout(() => {
-            alert("Proceeding to payment gateway...");
+        try {
+            // 1. Create Razorpay Order
+            const res = await fetch("/api/payments/razorpay/order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount: total }),
+            });
+            const order = await res.json();
+
+            // 2. Load Razorpay SDK
+            const isLoaded = await loadRazorpay();
+            if (!isLoaded) {
+                alert("Razorpay SDK failed to load. Are you online?");
+                setSubmitting(false);
+                return;
+            }
+
+            // 3. Open Razorpay Checkout
+            const options = {
+                key: process.env.NEXT_PUBLIC_RAZORPAY_ID || "rzp_test_your_id",
+                amount: order.amount,
+                currency: order.currency,
+                name: "TechFlow",
+                description: "Purchase of Premium Offerings",
+                order_id: order.id,
+                handler: async function (response) {
+                    // 4. Verify Payment
+                    const verifyRes = await fetch("/api/payments/razorpay/verify", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(response),
+                    });
+
+                    if (verifyRes.ok) {
+                        // 5. Save Order to Database
+                        await fetch("/api/orders", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                items: cart.map(item => ({
+                                    productId: item._id,
+                                    quantity: item.quantity,
+                                    price: item.price
+                                })),
+                                totalAmount: total,
+                                paymentId: response.razorpay_payment_id,
+                                status: 'paid',
+                                customer: formData
+                            }),
+                        });
+
+                        localStorage.removeItem("cart");
+                        alert("Payment successful! Order placed.");
+                        router.push("/");
+                    } else {
+                        alert("Payment verification failed.");
+                    }
+                },
+                prefill: {
+                    name: formData.name,
+                    email: formData.email,
+                    contact: formData.phone,
+                },
+                theme: {
+                    color: "#4f46e5",
+                },
+            };
+
+            const paymentObject = new window.Razorpay(options);
+            paymentObject.open();
+        } catch (error) {
+            console.error("Checkout error:", error);
+            alert("Something went wrong. Please try again.");
+        } finally {
             setSubmitting(false);
-        }, 1500);
+        }
     };
 
     if (loading) return <div className="min-h-screen pt-20 text-center text-slate-500">Loading checkout...</div>;
