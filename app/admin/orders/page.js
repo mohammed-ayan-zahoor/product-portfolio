@@ -13,10 +13,15 @@ export default function AdminOrdersPage() {
 
     const fetchOrders = async () => {
         setLoading(true);
-        const res = await fetch('/api/orders');
-        const data = await res.json();
-        setOrders(data);
-        setLoading(false);
+        try {
+            const res = await fetch('/api/orders');
+            const data = await res.json();
+            setOrders(Array.isArray(data) ? data : []);
+        } catch (err) {
+            setOrders([]);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const getStatusIcon = (status) => {

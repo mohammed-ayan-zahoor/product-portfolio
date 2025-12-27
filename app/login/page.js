@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock, Mail, Loader2, ArrowRight } from 'lucide-react';
+import toast from 'react-hot-toast';
 import Link from 'next/link';
 
 export default function LoginPage() {
@@ -25,14 +26,15 @@ export default function LoginPage() {
             });
 
             if (res.ok) {
+                toast.success('Welcome back, Admin!');
                 router.push('/admin');
                 router.refresh();
             } else {
                 const data = await res.json();
-                setError(data.message || 'Login failed');
+                toast.error(data.message || 'Login failed');
             }
         } catch (err) {
-            setError('An error occurred. Please try again.');
+            toast.error('Network error. Please try again.');
         } finally {
             setLoading(false);
         }

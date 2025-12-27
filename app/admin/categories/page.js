@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Save, X, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function AdminCategoriesPage() {
     const [categories, setCategories] = useState([]);
@@ -17,10 +18,15 @@ export default function AdminCategoriesPage() {
 
     const fetchCategories = async () => {
         setLoading(true);
-        const res = await fetch('/api/categories');
-        const data = await res.json();
-        setCategories(data);
-        setLoading(false);
+        try {
+            const res = await fetch('/api/categories');
+            const data = await res.json();
+            setCategories(Array.isArray(data) ? data : []);
+        } catch (err) {
+            setCategories([]);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleCreate = async (e) => {
@@ -33,14 +39,15 @@ export default function AdminCategoriesPage() {
                 body: JSON.stringify(newCategory),
             });
             if (res.ok) {
+                toast.success('Category created');
                 setNewCategory({ name: '', slug: '', isActive: true });
                 await fetchCategories();
             } else {
                 const data = await res.json();
-                alert(data.message || 'Error creating category');
+                toast.error(data.message || 'Error creating category');
             }
         } catch (err) {
-            alert('Network error');
+            toast.error('Network error');
         } finally {
             setSubmitting(false);
         }
@@ -48,25 +55,32 @@ export default function AdminCategoriesPage() {
 
     const handleUpdate = async (id) => {
         setSubmitting(true);
+        const loadingToast = toast.loading('Updating category...');
         const res = await fetch(`/api/categories/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(editData),
         });
         if (res.ok) {
+            toast.success('Category updated', { id: loadingToast });
             setIsEditing(null);
             fetchCategories();
         } else {
-            alert('Error updating category');
+            toast.error('Error updating category', { id: loadingToast });
         }
         setSubmitting(false);
     };
 
     const handleDelete = async (id) => {
         if (!confirm('Are you sure you want to delete this category?')) return;
+        const loadingToast = toast.loading('Deleting category...');
         const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' });
-        if (res.ok) fetchCategories();
-        else alert('Error deleting category');
+        if (res.ok) {
+            toast.success('Category deleted', { id: loadingToast });
+            fetchCategories();
+        } else {
+            toast.error('Error deleting category', { id: loadingToast });
+        }
     };
 
     return (

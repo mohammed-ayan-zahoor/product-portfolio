@@ -5,11 +5,17 @@ const ProductSchema = new mongoose.Schema({
     slug: { type: String, required: true, unique: true },
     description: { type: String, required: true },
     price: { type: Number, required: true },
-    images: [{ type: String }],
-    categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
+    images: [String],
+    features: [String],
+    categoryId: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true
+    },
     isActive: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now },
 });
+
+// Force delete model from cache to ensure schema changes are picked up
+delete mongoose.models.Product;
 
 const Product = mongoose.models.Product || mongoose.model('Product', ProductSchema);
 

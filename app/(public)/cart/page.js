@@ -13,19 +13,6 @@ export default function CartPage() {
         const savedCart = localStorage.getItem('cart');
         if (savedCart) {
             setCart(JSON.parse(savedCart));
-        } else {
-            // Seed mock data if empty for demo purposes
-            const mockCart = [
-                {
-                    _id: '1',
-                    title: 'Enterprise Server Pro',
-                    price: 150000,
-                    quantity: 1,
-                    images: ['https://images.unsplash.com/photo-1558494949-ef010cbdcc51?q=80&w=800&auto=format&fit=crop'],
-                }
-            ];
-            setCart(mockCart);
-            localStorage.setItem('cart', JSON.stringify(mockCart));
         }
         setLoading(false);
     }, []);

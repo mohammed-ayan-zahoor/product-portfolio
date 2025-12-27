@@ -27,6 +27,7 @@ export async function POST(request) {
     await dbConnect();
     try {
         const data = await request.json();
+        console.log('CREATING PRODUCT:', data); // Security: Log for debugging persistence
         const product = await Product.create(data);
         return NextResponse.json(product, { status: 201 });
     } catch (error) {

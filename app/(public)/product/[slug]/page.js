@@ -2,8 +2,10 @@ import { notFound } from "next/navigation";
 import { ShoppingCart, Shield, ArrowRight } from "lucide-react";
 import dbConnect from "@/lib/db";
 import Product from "@/models/Product";
-import Link from "next/link";
-import { AddToCartButton } from "./AddToCartButton"; // I'll create this to handle client-side logic
+import { ImageGallery } from "./ImageGallery";
+import { AddToCartButton } from "./AddToCartButton";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +17,7 @@ export async function generateMetadata({ params }) {
     if (!product) return { title: 'Product Not Found' };
 
     return {
-        title: `${product.title} | TechFlow`,
+        title: `${product.title} | Official Catalog`,
         description: product.description.substring(0, 160)
     };
 }
@@ -34,62 +36,81 @@ export default async function ProductPage({ params }) {
 
     if (!product) notFound();
 
+
     return (
-        <div className="min-h-screen bg-white pb-20 pt-24">
+        <div className="min-h-screen bg-slate-50 pb-20 pt-24">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-12">
+                {/* Main Product Card */}
+                <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-12 bg-white rounded-[40px] p-8 lg:p-12 shadow-2xl shadow-slate-200/50 border border-white overflow-hidden">
                     {/* Image Gallery */}
-                    <div className="aspect-square w-full overflow-hidden rounded-2xl bg-slate-100 border border-slate-200">
-                        {product.images?.[0] ? (
-                            <img
-                                src={product.images[0]}
-                                alt={product.title}
-                                className="h-full w-full object-cover object-center"
-                            />
-                        ) : (
-                            <div className="flex h-full w-full items-center justify-center text-slate-400">
-                                No Image Available
+                    <ImageGallery images={product.images} title={product.title} />
+
+                    {/* Primary Info & Quick Actions */}
+                    <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0 flex flex-col h-full min-w-0">
+                        <div className="space-y-2">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/40">Premium Tech Solution</span>
+                            <h1 className="text-4xl font-black tracking-tight text-slate-900 break-words">{product.title}</h1>
+                        </div>
+
+                        <div className="mt-6 flex items-center gap-3">
+                            <span className="text-4xl font-black text-primary">₹{product.price.toLocaleString()}</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-1 rounded-md">Excl. GST</span>
+                        </div>
+
+                        {/* Feature Chips (Breadcrumb Style) */}
+                        {product.features && product.features.length > 0 && (
+                            <div className="mt-8 flex flex-wrap gap-2">
+                                {product.features.map((feature, idx) => (
+                                    <div key={idx} className="flex items-center gap-2 rounded-full border border-slate-100 bg-slate-50/50 px-4 py-1.5 transition-all hover:bg-white hover:border-primary/20 group">
+                                        <div className="h-1.5 w-1.5 rounded-full bg-primary/40 group-hover:bg-primary transition-colors" />
+                                        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 group-hover:text-slate-900 transition-colors">{feature}</span>
+                                    </div>
+                                ))}
                             </div>
                         )}
+
+                        <div className="mt-auto pt-10 flex flex-col sm:flex-row items-center gap-6">
+                            <AddToCartButton product={product} />
+
+                            <div className="flex items-center gap-2 text-slate-400">
+                                <Shield className="h-5 w-5" />
+                                <span className="text-[10px] font-extrabold uppercase tracking-widest">Enterprise Secured</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Detailed Section Below the Fold */}
+                <div className="mt-12 lg:mt-20">
+                    <div className="flex items-center gap-4 mb-10">
+                        <h2 className="text-2xl font-black text-slate-900">Technical Deep Dive</h2>
+                        <div className="h-px flex-1 bg-slate-200" />
                     </div>
 
-                    {/* Product Info */}
-                    <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
-                        <h1 className="text-3xl font-bold tracking-tight text-foreground">{product.title}</h1>
-
-                        <div className="mt-4">
-                            <h2 className="sr-only">Product information</h2>
-                            <p className="text-3xl tracking-tight text-primary font-bold">₹{product.price.toLocaleString()}</p>
+                    <div className="bg-white rounded-[40px] p-8 lg:p-16 border border-slate-100 shadow-xl shadow-slate-200/20 overflow-hidden">
+                        <div className="prose prose-slate max-w-none break-words prose-p:text-slate-600 prose-p:leading-[1.8] prose-p:font-medium prose-p:text-lg prose-headings:font-black prose-headings:text-slate-900 prose-li:font-medium prose-li:text-slate-600 prose-strong:text-slate-900">
+                            <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                    p: ({ node, ...props }) => <p className="mb-8 last:mb-0" {...props} />,
+                                    ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-8 space-y-3" {...props} />,
+                                    ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-8 space-y-3" {...props} />,
+                                    li: ({ node, ...props }) => <li className="" {...props} />,
+                                    h2: ({ node, ...props }) => <h2 className="text-2xl font-black mt-12 mb-6 text-slate-900" {...props} />,
+                                    h3: ({ node, ...props }) => <h3 className="text-xl font-bold mt-8 mb-4 text-slate-900" {...props} />,
+                                    table: ({ node, ...props }) => (
+                                        <div className="my-8 overflow-hidden rounded-2xl border border-slate-100 shadow-sm">
+                                            <table className="w-full border-collapse bg-white text-left text-sm" {...props} />
+                                        </div>
+                                    ),
+                                    thead: ({ node, ...props }) => <thead className="bg-slate-50 border-b border-slate-100 font-bold text-slate-900" {...props} />,
+                                    th: ({ node, ...props }) => <th className="px-6 py-4" {...props} />,
+                                    td: ({ node, ...props }) => <td className="px-6 py-4 border-b border-slate-50 text-slate-600" {...props} />,
+                                }}
+                            >
+                                {product.description?.replace(/^(#{1,6}|[-*])(?!\s)/gm, '$1 ')}
+                            </ReactMarkdown>
                         </div>
-
-                        <div className="mt-6">
-                            <h3 className="sr-only">Description</h3>
-                            <div className="space-y-6 text-base text-foreground/70 leading-relaxed">
-                                {product.description}
-                            </div>
-                        </div>
-
-                        <div className="mt-10 flex items-center gap-4">
-                            <AddToCartButton product={product} />
-                        </div>
-
-                        <section aria-labelledby="details-heading" className="mt-12 border-t border-slate-200 pt-10">
-                            <h2 id="details-heading" className="text-sm font-bold uppercase tracking-wider text-foreground">Premium Benefits</h2>
-                            <div className="mt-6 space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
-                                        <Shield className="h-4 w-4" />
-                                    </div>
-                                    <p className="text-sm font-medium text-foreground/70">Enterprise-grade security and reliability</p>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
-                                        <ArrowRight className="h-4 w-4" />
-                                    </div>
-                                    <p className="text-sm font-medium text-foreground/70">24/7 Professional technical support</p>
-                                </div>
-                            </div>
-                        </section>
                     </div>
                 </div>
             </div>
