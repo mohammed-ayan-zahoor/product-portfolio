@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# TechFlow - Premium Product Portfolio & Store
 
-## Getting Started
+**TechFlow** is a modern, full-stack e-commerce and product catalog platform built with Next.js 15. It features a premium public storefront for showcasing digital and physical products (Hardware, Software, Education) and a powerful, secure Admin Dashboard for managing the catalog.
 
-First, run the development server:
+![Project Preview](https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop)
 
+## 🚀 Key Features
+
+### 🛍️ Public Storefront
+*   **Modern UI/UX**: Responsive, high-performance design using Tailwind CSS and Framer Motion.
+*   **Dynamic Catalog**: Filter products by Category (Hardware, Software, Education).
+*   **Rich Product Details**: Full Markdown support for technical descriptions, feature highlights, and image galleries.
+*   **Shopping Cart**: LocalStorage-based cart with seamless checkout flow.
+*   **Secure Checkout**: Integrated Razorpay payment gateway.
+
+### ⚡ Admin Dashboard
+*   **Secure Authentication**: JWT-based login with HttpOnly cookies.
+*   **Product Management**: Create, Edit, and Delete products with a rich WYSIWYG editor.
+*   **Cloudinary Integration**: Drag-and-drop image uploads directly to the cloud.
+*   **Markdown Support**: "Github-flavored" Markdown preview for writing technical docs.
+*   **Data Persistence**: Robus MongoDB database connection (Atlas-ready).
+
+## 🛠️ Tech Stack
+
+*   **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+*   **Database**: [MongoDB](https://www.mongodb.com/) (Mongoose ODM)
+*   **Styling**: [Tailwind CSS](https://tailwindcss.com/) + [Framer Motion](https://www.framer.com/motion/)
+*   **Authentication**: JWT + HttpOnly Cookies
+*   **Storage**: Cloudinary (Image Hosting)
+*   **Payments**: Razorpay
+
+## 🏁 Getting Started
+
+### 1. Prerequisites
+*   Node.js 18+ installed.
+*   MongoDB Atlas account (or local MongoDB).
+*   Cloudinary account.
+
+### 2. Installation
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/mohammed-ayan-zahoor/product-portfolio.git
+cd product-portfolio
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Environment Setup
+Create a `.env.local` file in the root directory and add:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```env
+# Database
+MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/product-db
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Authentication
+JWT_SECRET=your_super_secret_key_here
 
-## Learn More
+# Cloudinary (Images)
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 
-To learn more about Next.js, take a look at the following resources:
+# Razorpay (Payments)
+NEXT_PUBLIC_RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Running Locally
+```bash
+npm run dev
+```
+Visit `http://localhost:3000` for the store, or `http://localhost:3000/login` for the admin panel.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📦 Deployment
 
-## Deploy on Vercel
+This project is optimized for deployment on **Vercel** with a **MongoDB Atlas** database.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+👉 **[Read the Full Deployment Guide](./DEPLOYMENT.md)** for step-by-step instructions.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📄 License
+
+This project is open-source and available under the MIT License.
