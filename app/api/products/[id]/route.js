@@ -14,7 +14,6 @@ export async function PUT(request, { params }) {
 
     try {
         const data = await request.json();
-        console.log('UPDATING PRODUCT:', id, data); // Security: Log for debugging persistence
         const updated = await Product.findByIdAndUpdate(id, data, { new: true });
         return NextResponse.json(updated);
     } catch (error) {
