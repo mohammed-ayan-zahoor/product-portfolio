@@ -7,7 +7,7 @@ import { ArrowRight, Server, Code, GraduationCap, ShieldCheck } from 'lucide-rea
 export default function Hero() {
     return (
         <div className="relative overflow-hidden bg-slate-50 pt-16 pb-32 lg:pt-32 lg:pb-40">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 relative z-10">
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
                     {/* Text Content */}
                     <div className="max-w-2xl">

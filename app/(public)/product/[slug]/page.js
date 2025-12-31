@@ -39,7 +39,7 @@ export default async function ProductPage({ params }) {
 
     return (
         <div className="min-h-screen bg-slate-50 pb-20 pt-24">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
                 {/* Main Product Card */}
                 <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-12 bg-white rounded-[40px] p-8 lg:p-12 shadow-2xl shadow-slate-200/50 border border-white overflow-hidden">
                     {/* Image Gallery */}

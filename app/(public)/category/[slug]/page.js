@@ -57,7 +57,7 @@ export default async function CategoryPage({ params }) {
 
     return (
         <div className="min-h-screen bg-slate-50/50 pb-20 pt-24">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
                 <div className="mb-12">
                     <h1 className="text-4xl font-bold tracking-tight text-foreground">{category.name}</h1>
                     <p className="mt-4 text-lg text-foreground/50 max-w-2xl">
